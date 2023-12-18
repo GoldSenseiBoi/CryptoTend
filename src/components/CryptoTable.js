@@ -2,109 +2,62 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './cryptoTable.css'; // Importez le fichier CSS
 
-const CryptoTable = () => {
+const CryptoToTheMoon = () => {
   const [cryptoData, setCryptoData] = useState([]);
-  const [topVolumeData, setTopVolumeData] = useState([]);
-  const [bestVolumeData, setBestVolumeData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          'https://api.binance.com/api/v3/ticker/24hr'
-        );
+        const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
         setCryptoData(response.data);
-
-        const sortedData = response.data.sort(
-          (a, b) => parseFloat(b.volume) - parseFloat(a.volume)
-        );
-
-        const topVolume = sortedData.slice(0, 25);
-        setTopVolumeData(topVolume);
-
-        const bestVolume = sortedData.slice(0, 15);
-        setBestVolumeData(bestVolume);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchData();
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000); // Rafraîchissement toutes les 5 secondes
+
+    return () => clearInterval(interval); // Nettoyage de l'intervalle lors du démontage du composant
   }, []);
 
-  const calculateVolumePercentage = (volume) => {
-    const totalVolume = bestVolumeData.reduce(
-      (accumulator, crypto) => accumulator + parseFloat(crypto.volume),
-      0
-    );
-    const percentage = (parseFloat(volume) / totalVolume) * 100;
-    return percentage.toFixed(2);
+  const getPercentageColor = (value) => {
+    return value > 0 ? 'green' : value < 0 ? 'red' : 'black';
   };
 
-  const getPercentageColor = (percentage) => {
-    if (parseFloat(percentage) > 0) {
-      return 'green'; // Couleur verte pour la hausse
-    } else if (parseFloat(percentage) < 0) {
-      return 'red'; // Couleur rouge pour la baisse
-    } else {
-      return 'black'; // Couleur noire par défaut
-    }
-  };
+  // Filtrer les cryptomonnaies avec une forte croissance des prix (bull market)
+  const potentialBullMarketCryptos = cryptoData
+    .filter((crypto) => parseFloat(crypto.priceChangePercent) > 8) // Exemple : 10% de croissance
+    .slice(0, 40); // Sélectionner les 35 meilleures
 
+  // Filtrer les cryptomonnaies avec une forte baisse des prix (bear market)
+  const potentialBearMarketCryptos = cryptoData
+    .filter((crypto) => parseFloat(crypto.priceChangePercent) < -6) // Exemple : -10% de baisse
+    .slice(0, 25); // Sélectionner les 25 meilleures
+
+  // Affichage des cryptomonnaies potentielles pour le bull market et le bear market
   return (
     <div>
-      <h2>Tendance des cryptomonnaies</h2>
-      <h3>Meilleurs volumes des 24 dernières heures</h3>
-      <table className="crypto-table">
-        <thead>
-          <tr>
-            <th>Crypto</th>
-            <th>Dernier prix</th>
-            <th>Volume</th>
-            <th>Volume %</th>
-            <th>Volatility %</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bestVolumeData.map((crypto) => (
-            <tr key={crypto.symbol}>
-              <td>{crypto.symbol}</td>
-              <td>{crypto.lastPrice}</td>
-              <td>{crypto.volume}</td>
-              <td style={{ color: getPercentageColor(calculateVolumePercentage(crypto.volume)) }}>
-                {calculateVolumePercentage(crypto.volume)}%
-              </td>
-              <td>Volatility data</td> {/* à Remplacez avec les données de volatilité réelles */}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2>Top 35 des cryptomonnaies potentielles "To the Moon" dans les prochaines heures :</h2>
+      <ol class="cardplus">
+        {potentialBullMarketCryptos.map((crypto) => (
+          <div class="card"><li key={crypto.symbol} style={{ color: getPercentageColor(parseFloat(crypto.priceChangePercent)) }}>
+            {crypto.symbol}  <br /><br /><br />Croissance : {parseFloat(crypto.priceChangePercent).toFixed(2)}%
+          </li></div>
+        ))}
+      </ol>
 
-      <h3>Meilleurs volumes des 12 dernières heures</h3>
-      <table className="crypto-table">
-        <thead>
-          <tr>
-            <th>Crypto</th>
-            <th>Dernier prix</th>
-            <th>Volume</th>
-            <th>Volume %</th>
-          </tr>
-        </thead>
-        <tbody>
-          {topVolumeData.map((crypto) => (
-            <tr key={crypto.symbol}>
-              <td>{crypto.symbol}</td>
-              <td>{crypto.lastPrice}</td>
-              <td>{crypto.volume}</td>
-              <td style={{ color: getPercentageColor(calculateVolumePercentage(crypto.volume)) }}>
-                {calculateVolumePercentage(crypto.volume)}%
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2>Top 25 des cryptomonnaies potentielles "Bear Market" dans les prochaines heures :</h2>
+      <ol class="cardplus">
+        {potentialBearMarketCryptos.map((crypto) => (
+          <div class="card"><li key={crypto.symbol} style={{ color: getPercentageColor(parseFloat(crypto.priceChangePercent)) }}>
+            {crypto.symbol} <br /><br /><br />Baisse : {parseFloat(crypto.priceChangePercent).toFixed(2)}%
+          </li></div>
+        ))}
+      </ol>
     </div>
   );
 };
 
-export default CryptoTable;
+export default CryptoToTheMoon;
