@@ -25,4 +25,4 @@
     <p>Les contributions sont les bienvenues ! N'hésitez pas à <a href="#">ouvrir une issue</a> ou à proposer une pull request pour suggérer de nouvelles fonctionnalités, signaler des bugs ou améliorer le code existant.</p>
 
 <h3>Licence</h3>
-    <p>Ce projet est sous licence MIT. Pour plus d'informations, veuillez consulter le fichier <a href="#">LICENSE</a>.</p>
+    <p>Ce projet est sous licence MIT.</p>
