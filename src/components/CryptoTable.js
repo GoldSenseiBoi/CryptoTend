@@ -28,7 +28,7 @@ const CryptoToTheMoon = () => {
 
   // Filtrer les cryptomonnaies avec une forte croissance des prix (bull market)
   const potentialBullMarketCryptos = cryptoData
-    .filter((crypto) => parseFloat(crypto.priceChangePercent) > 8) // Exemple : 10% de croissance
+    .filter((crypto) => parseFloat(crypto.priceChangePercent) > 10) // Exemple : 10% de croissance
     .slice(0, 40); // Sélectionner les 35 meilleures
 
   // Filtrer les cryptomonnaies avec une forte baisse des prix (bear market)
